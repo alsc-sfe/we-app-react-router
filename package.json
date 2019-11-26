@@ -64,7 +64,7 @@
   },
   "scripts": {
     "lint": "npm run tslint && npm run stylelint",
-    "tslint": "eslint ./src --ext '.ts,.tsx,.js,.jsx' --fix",
+    "tslint": "eslint ./src --ext '.ts,.tsx,.js,.jsx'",
     "stylelint": "stylelint src/**/*.less --syntax less --fix"
   },
   "pre-commit": [
