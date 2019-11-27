@@ -219,6 +219,8 @@ export const DEFAULTRouteMatch: RouteMatch = function DEFAULTRouteMatch({
 
       let keys = [];
       // pathToRegexp只匹配/one/:param的形式，但无法匹配/one/:param/two
+      // keys 当路由中存在参数或正则时，如:param或(.*)，keys才不为空
+      // 可以匹配 /store 或 /store/，但不能匹配 /store/list
       let regexp = pathToRegexp(tmpRoute.path, keys, {
         strict: tmpStrict,
       });
@@ -230,9 +232,10 @@ export const DEFAULTRouteMatch: RouteMatch = function DEFAULTRouteMatch({
         }
 
         // pathToRegexp是完全匹配的，针对exact为false，需增加后置匹配
+        // 匹配 /store/list 或 /store/list/ 或 /store/
         if (!match && !tmpExact) {
           keys = [];
-          regexp = pathToRegexp(`${tmpRoute.path}/.*`, keys, {
+          regexp = pathToRegexp(`${tmpRoute.path}/(.*)`, keys, {
             strict: tmpStrict,
           });
         }
@@ -242,6 +245,7 @@ export const DEFAULTRouteMatch: RouteMatch = function DEFAULTRouteMatch({
         match = regexp.test(tmpPath);
       } else {
         // 自行组装正则匹配
+        // 路由中不存在参数或正则，所以keys为空，因此要自行组装正则
         // exact: 完全匹配, strict: 结尾无/
         regexp = new RegExp(`^${tmpRoute.path}${tmpExact ? '' : '(?:/.*)?'}${tmpStrict ? '' : '(?:/)?'}$`);
         match = regexp.test(tmpPath);
