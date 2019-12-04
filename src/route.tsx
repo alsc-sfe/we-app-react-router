@@ -16,7 +16,7 @@ export interface UseRouteParams extends RouteMatchParams {
 
 // 优先按照route进行匹配，如果没有指定route，则使用to
 export function useRoute({
-  to, route, routeIgnore, exact, strict,
+  to, route, routeIgnore,
   routeMatch = DEFAULTRouteMatch,
   onRouteMatch,
   locate = window.location,
@@ -29,8 +29,6 @@ export function useRoute({
   const routeRule = route || to;
 
   const match = useMemo(() => routeMatch({
-    exact,
-    strict,
     route: routeRule,
     routeIgnore,
     locate,
