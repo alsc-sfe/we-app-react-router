@@ -1,6 +1,6 @@
 import pathToRegexp from 'path-to-regexp';
 import { RouterType } from '../types';
-import { currentMicroAppName } from './global';
+import { getCurrentMicroAppName } from './global';
 import { isString, isObj, ajustPathname } from './util';
 import { ParseLocationParams, parseLocate, getPathnamePrefix, Locate } from './locate';
 import { Route } from '..';
@@ -31,13 +31,15 @@ export interface ParseRoute {
 // 丢弃bool
 export function parseRoute({
   route,
-  microAppName = currentMicroAppName,
+  microAppName,
   basename = '',
   exact = false,
 }: ParseRoute) {
   if (!route) {
     return [];
   }
+
+  microAppName = getCurrentMicroAppName(microAppName);
 
   let routes = route;
   if (!Array.isArray(route)) {
@@ -47,22 +49,44 @@ export function parseRoute({
   const newRoutes: RouteObj[] = [];
   (routes as SimpleRoute[]).forEach(r => {
     if (isString(r)) {
+      // exact为false时，需要产生2条匹配规则
+      if (!exact) {
+        newRoutes.push({
+          path: getRoutePathname({
+            path: r as string,
+            microAppName,
+            basename,
+            exact: false,
+          }),
+        });
+      }
       newRoutes.push({
         path: getRoutePathname({
           path: r as string,
           microAppName,
           basename,
-          exact,
+          exact: true,
         }),
       });
     } else if (isObj(r)) {
+      if (!((r as RouteObj).exact || exact)) {
+        newRoutes.push({
+          ...(r as RouteObj),
+          path: getRoutePathname({
+            path: (r as RouteObj).path,
+            microAppName,
+            basename,
+            exact: false,
+          }),
+        });
+      }
       newRoutes.push({
         ...(r as RouteObj),
         path: getRoutePathname({
           path: (r as RouteObj).path,
           microAppName,
           basename,
-          exact: (r as RouteObj).exact || exact,
+          exact: true,
         }),
       });
     }
@@ -88,13 +112,15 @@ export function isAbsolutePathname(pathname: string) {
 
 function getRoutePathname({
   path,
-  microAppName = currentMicroAppName,
+  microAppName,
   basename = '',
   exact = false,
 }: GetRoutePathnameParams) {
   if (!isString(path)) {
     return path;
   }
+
+  microAppName = getCurrentMicroAppName(microAppName);
 
   let fullPathname = path;
 
@@ -111,7 +137,7 @@ function getRoutePathname({
 
   fullPathname = ajustPathname(`${pathnamePrefix}/${fullPathname}`);
 
-  if (exact) {
+  if (!exact) {
     if (fullPathname.slice(-1) !== '/') {
       fullPathname += '/';
     }
@@ -129,10 +155,12 @@ export interface ParseRouteParams extends ParseLocationParams {
 export function parseRouteParams({
   route = '',
   locate = window.location,
-  microAppName = currentMicroAppName,
+  microAppName,
   routerType = RouterType.browser,
   basename = '',
 }: ParseRouteParams) {
+  microAppName = getCurrentMicroAppName(microAppName);
+
   const loc = parseLocate({
     locate,
     routerType,
@@ -196,10 +224,12 @@ export type RouteMatch = (params: RouteMatchParams) => boolean;
 export const DEFAULTRouteMatch: RouteMatch = function DEFAULTRouteMatch({
   route, routeIgnore,
   locate = window.location,
-  microAppName = currentMicroAppName,
+  microAppName,
   basename = '',
   routerType = RouterType.browser,
 }) {
+  microAppName = getCurrentMicroAppName(microAppName);
+
   const needIgnore = route === true || !route;
   const currentRoutes = needIgnore ? routeIgnore : route;
 

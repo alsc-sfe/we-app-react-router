@@ -1,7 +1,8 @@
 import React from 'react';
 import { getGotoHref, GetGotoHrefParams } from './util/locate';
 import { getRouteSwitchConfig, Route } from './util/route';
-import { RouterConsumer, RouterConfig } from './router';
+import { RouterConsumer } from './router';
+import { getCurrentMicroAppName } from './util/global';
 
 interface LinkElementProps extends GetGotoHrefParams {
   children: any;
@@ -22,6 +23,7 @@ function LinkElement({ to, microAppName, basename, routerType, children, ...rest
 export interface LinkProps {
   to: Route;
   children: any;
+  microAppName?: string;
 }
 
 export default function Link(props: LinkProps) {
@@ -29,7 +31,13 @@ export default function Link(props: LinkProps) {
     <RouterConsumer>
       {
         (routerConfig) => {
-          return <LinkElement {...props} {...routerConfig} />;
+          return (
+            <LinkElement
+              {...props}
+              {...routerConfig}
+              microAppName={getCurrentMicroAppName(props.microAppName)}
+            />
+          );
         }
       }
     </RouterConsumer>

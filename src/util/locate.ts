@@ -1,14 +1,14 @@
 import { RouterType } from '../types';
-import { currentMicroAppName } from './global';
+import { getCurrentMicroAppName } from './global';
 import { parseRouteParams, Route, RouteObj, isAbsolutePathname } from './route';
 import { isObj, isString, ajustPathname } from './util';
 
 // 路径由basename+微应用名称+页面路径，三部分构成
-export function getPathnamePrefix({ microAppName = currentMicroAppName, basename = '', absolute = false }) {
+export function getPathnamePrefix({ microAppName, basename = '', absolute = false }) {
   if (absolute) {
     return ajustPathname(`/${basename}`);
   }
-  return ajustPathname(`/${basename}/${microAppName}`);
+  return ajustPathname(`/${basename}/${getCurrentMicroAppName(microAppName)}`);
 }
 
 export type Locate = string | Location | WeAppLocation;
@@ -48,13 +48,15 @@ export interface ParseLocationParams {
 export function parseLocate({
   locate = window.location,
   routerType = RouterType.browser,
-  microAppName = currentMicroAppName,
+  microAppName,
   basename = '',
   route,
 }: ParseLocationParams) {
   if (locate instanceof WeAppLocation) {
     return locate;
   }
+
+  microAppName = getCurrentMicroAppName(microAppName);
 
   const defaultPathname = basename || '/';
 
@@ -148,9 +150,11 @@ export function parseLocate({
 export function parseQuery({
   locate = window.location,
   routerType = RouterType.browser,
-  microAppName = currentMicroAppName,
+  microAppName,
   basename = '',
 }: ParseLocationParams) {
+  microAppName = getCurrentMicroAppName(microAppName);
+
   const { search } = parseLocate({
     locate,
     routerType,
@@ -177,10 +181,12 @@ export interface GetGotoPathnameParams {
 
 export function getGotoPathname({
   to,
-  microAppName = currentMicroAppName,
+  microAppName,
   basename = '',
 }: GetGotoPathnameParams) {
   let link = to.toString();
+
+  microAppName = getCurrentMicroAppName(microAppName);
 
   if (isObj(to)) {
     const { path, query } = to as RouteObj;
@@ -221,13 +227,13 @@ export interface GetGotoHrefParams {
 // 返回带routerType的href
 export function getGotoHref({
   to,
-  microAppName = currentMicroAppName,
+  microAppName,
   routerType = RouterType.browser,
   basename = '',
 }: GetGotoHrefParams) {
   const gotoPathname = getGotoPathname({
     to,
-    microAppName,
+    microAppName: getCurrentMicroAppName(microAppName),
     basename,
   });
   const gotoHref = ajustPathname(`${routerType}${gotoPathname}`);

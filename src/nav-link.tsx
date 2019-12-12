@@ -3,9 +3,10 @@ import { useRoute, RouteElementProps } from './route';
 import { getGotoHref } from './util/locate';
 import { getRouteSwitchConfig, Route } from './util/route';
 import { RouterConsumer } from './router';
+import { getCurrentMicroAppName } from './util/global';
 
 function NavLinkElement(props: RouteElementProps) {
-  const { to, route, exact, strict,
+  const { to, route,
     routeMatch, onRouteMatch, matchProps,
     children, locate, microAppName, routerType, basename, ...rest } = props;
 
@@ -37,6 +38,7 @@ export interface NavLinkProps {
   to: Route;
   route?: Route;
   children: any;
+  microAppName?: string;
 }
 
 export default function NavLink(props: NavLinkProps) {
@@ -44,7 +46,13 @@ export default function NavLink(props: NavLinkProps) {
     <RouterConsumer>
       {
         (routerConfig) => {
-          return <NavLinkElement {...props} {...routerConfig} />;
+          return (
+            <NavLinkElement
+              {...props}
+              {...routerConfig}
+              microAppName={getCurrentMicroAppName(props.microAppName)}
+            />
+          );
         }
       }
     </RouterConsumer>

@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { parseLocate, Locate } from './util/locate';
 import { DEFAULTRouteMatch, RouteMatch, Route as TRoute, RouteMatchParams } from './util/route';
-import { currentMicroAppName } from './util/global';
+import { getCurrentMicroAppName } from './util/global';
 import { RouterType } from './types';
 import { isFunction } from './util/util';
 import { RouterConsumer } from './router';
@@ -20,13 +20,15 @@ export function useRoute({
   routeMatch = DEFAULTRouteMatch,
   onRouteMatch,
   locate = window.location,
-  microAppName = currentMicroAppName,
+  microAppName,
   basename = '',
   routerType = RouterType.browser,
 }: UseRouteParams) {
   const [currentRoute, changeCurrentRoute] = useState(window.location.href);
   // 将当前访问的路径和当前指定的路径进行匹配，判断是否匹配
   const routeRule = route || to;
+
+  microAppName = getCurrentMicroAppName(microAppName);
 
   const match = useMemo(() => routeMatch({
     route: routeRule,
@@ -71,7 +73,7 @@ export interface RouteElementProps extends UseRouteParams {
 }
 
 function RouteElement(props: RouteElementProps) {
-  const { to, route, routeIgnore, exact, strict,
+  const { to, route, routeIgnore,
     routeMatch, onRouteMatch, matchProps, children,
     locate, microAppName, basename, routerType, ...rest } = props;
 
@@ -99,6 +101,8 @@ export interface RouteProps {
   route?: TRoute;
   routeIgnore?: TRoute;
   children: any;
+  microAppName?: string;
+  [prop: string]: any;
 }
 
 export default function Route(props: RouteProps) {
@@ -106,7 +110,13 @@ export default function Route(props: RouteProps) {
     <RouterConsumer>
       {
         (routerConfig) => {
-          return <RouteElement {...props} {...routerConfig} />;
+          return (
+            <RouteElement
+              {...props}
+              {...routerConfig}
+              microAppName={getCurrentMicroAppName(props.microAppName)}
+            />
+          );
         }
       }
     </RouterConsumer>
