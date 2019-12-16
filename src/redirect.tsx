@@ -42,7 +42,7 @@ export default function Redirect(props: RedirectProps) {
   );
 }
 
-export const redirectTo = function (to: Route, opts: { microAppName?: string } | undefined) {
+export const redirectTo = function (to: Route, opts?: { microAppName?: string } | undefined) {
   const { microAppName } = opts || {};
   cem.trackShareDataOnce(Symbol.for('router'), (routerConfig: RouterConfig) => {
     if (routerConfig) {
