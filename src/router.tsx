@@ -13,9 +13,10 @@ export interface RouterProps extends RouterConfig {
   [prop: string]: any;
 }
 
+const { Provider, Consumer, consume } = createContext(null, 'router', true);
+
 export default function Router(props: RouterProps) {
   const { children, ...restProps } = props;
-  const { Provider } = createContext(null, 'router');
 
   return (
     <Provider value={restProps}>{children}</Provider>
@@ -34,8 +35,6 @@ export interface RouterConsumerProps {
 export function RouterConsumer(props: RouterConsumerProps) {
   const { children } = props;
 
-  const { Consumer } = createContext(null, 'router');
-
   return (
     <Consumer>
       {
@@ -50,3 +49,7 @@ export function RouterConsumer(props: RouterConsumerProps) {
     </Consumer>
   );
 }
+
+export {
+  consume as routerConsume,
+};
